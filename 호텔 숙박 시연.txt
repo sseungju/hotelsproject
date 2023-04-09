@@ -1,0 +1,227 @@
+-- 유저시나리오
+
+-- 시퀀스를 통해 자동으로 id 생성
+
+-- 1. 업주 숙박 등록
+-- 1-1) 업주 회원가입 
+EXEC owner_signup( 'abcd1234', 'password', '010-1111-2222', '정원', '곽', 'abcd1234@gmail.com' );
+EXEC owner_signup( 'abc23d34', 'password', '010-3333-2222', '재훈', '안', 'a34@gmail.com' );
+SELECT * FROM owner;
+
+-- 1-2) 업주 숙박업소 등록
+EXEC add_adds(6, '호텔', '달러', '체인X', '동대문 플라자 호텔' , 'Dongdaemun Plaza', '중구 36, 서울특별시, 서울특별시, 04513', '2022-10-24', 'A6');
+SELECT * FROM adds;
+
+-- 1-3) 관리자 승인
+-- 1-4) 업주 숙박업소 및 객실 입력
+
+-- 숙박업소 입력
+EXEC add_sukbak('I6', 3, 1, '/src/image.png', '아름다운 경관을 가진 호텔', 'A56', 'C28'); 
+SELECT * FROM sukbak;
+
+-- 객실 입력
+EXEC room_add('룸', 50000, 0, 1, 50, 601, 'H4');
+SELECT * FROM room;
+
+-- 1-5) 업주가 등록한 호텔 정보 출력
+EXEC select_sukbak('H1'); 
+
+-- 2. 회원가입 및 로그인
+-- 2-1) 회원가입
+--      아이디 중복체크기능 
+EXEC member_signup( 'qwert1234', 'aaa@naver.com', '지원', '정', 'ppww', 0, '010-1111-1111');
+EXEC member_signup( 'qwert1234', 'aaa@naver.com', '지원', '정', 'ppww', 0, '010-1111-1111');
+
+SELECT * FROM member;
+
+-- 2-2) 로그인
+EXEC member_signin('qwert1234', 'ppww');    -- 로그인
+EXEC member_signin('qwert1234', 'pasdfw');  -- 로그인실패 (패스워드 다름)
+EXEC member_signin('q222222', 'pasdfw');    -- 로그인실패 (아이디 없음)
+
+
+
+-- 3. 호텔 검색
+-- 3-1) 지역, 인원수 입력 
+
+SELECT S_KNAME, r_num 
+FROM SUKBAK S JOIN ROOM R ON S.S_ID= R.S_ID 
+JOIN CITY C ON S.CT_ID = C.CT_ID
+WHERE  CT_NAME = '서울' AND R_PPL>=1 AND R.r_id NOT IN(
+SELECT r_id
+FROM bookmore bm
+WHERE (bm.bm_in>='20221213' and bm.bm_in<='20221215') or (bm.bm_out>='20221213' and bm.bm_out<='20221215')
+);
+
+-- 3-2) 숙박 시설 이름으로 검색 (호텔이름에 오크우드가 포함된 호텔 조회)
+SELECT S_ID FROM SUKBAK WHERE S_KNAME LIKE  '%오크우드%';
+
+-- 3-3) 숙박시설 등급으로 조회
+SELECT S_KNAME  FROM SUKBAK WHERE S_GRADE=5;
+
+-- 3-4) 숙박시설 유형(호텔, 료칸 타입 호텔 출력)
+SELECT S_KNAME, ST_TYPE FROM SUKBAK S JOIN STYPE T ON S.ST_ID=T.ST_ID WHERE ST_TYPE IN ('호텔','료칸');
+
+-- 3-5) 지역 (강남지역 호텔)
+SELECT S_KNAME, A_NAME FROM SUKBAK S JOIN AREA A ON S.A_ID = A.A_ID WHERE A_NAME = '강남';
+
+-- 3-6) 관광명소 주변 호텔
+SELECT S_KNAME FROM SUKBAK S JOIN CITY C ON S.CT_ID=C.CT_ID
+JOIN LANDMARK L ON L.CT_ID=C.CT_ID
+
+-- 3-7) 아침 점심 제공 호텔 조회
+SELECT S_KNAME 
+FROM SUKBAK  S JOIN MEAL M ON S.S_ID = M.MEAL_ID 
+WHERE MEAL_B=1AND MEAL_L=1;
+
+-- 3-8) 편의시설 포함하는 호텔 조회
+편의 시설 서비스
+SELECT S_KNAME FROM SUKBAK S JOIN ROOM R ON S.S_ID= R.S_ID
+JOIN RINFO F ON F.R_ID=R.R_ID
+WHERE RIC_CON IN ('50인치 LED TV','하우스키핑 서비스(매일)')
+GROUP BY S_KNAME;
+
+-- 4. 조회
+-- 4-1) 호텔 ID값을 넣으면 호텔 관련 정보 조회
+EXEC select_sukbak('H1');
+
+
+-- 4-2) 지원 조회
+SELECT * FROM SUPPORT;
+
+-- 4-3) 도시 소개
+SELECT CT_ID, CT_NAME, CT_CON 
+FROM CITY C JOIN COUNTRY N ON C.C_ID = N.C_ID
+WHERE N.C_ID = 'N10';
+
+-- 4-4) 서울 인기 지역 조회
+SELECT A_ID, A_NAME, A_CON 
+FROM AREA A JOIN CITY C ON A.CT_ID=C.CT_ID
+WHERE C_ID = 'N10';
+
+-- 4-5) 해당 도시의 인기 랜드마크 조회
+SELECT LM_ID, LM_NAME, LM_CON 
+FROM LANDMARK L JOIN CITY C ON L.CT_ID=C.CT_ID
+WHERE C_ID = 'N10';
+
+-- 4-6) 해당 랜드마크 주변 가볼만한 곳 및 숙소 조회
+
+Select NLM_NAME
+FROM NEARLM N JOIN LANDMARK L ON N.LM_ID=L.LM_ID 
+WHERE LM_NAME = '롯데월드';
+
+SELECT SLM_NAME 
+FROM SLM S JOIN LANDMARK L ON S.LM_ID=L.LM_ID 
+WHERE LM_NAME= '롯데월드';
+
+
+-- 4-7) 지역 근처 가볼만한 장소 및 숙소 조회
+
+SELECT NA_NAME FROM NEARAREA N JOIN AREA A ON N.A_ID=A.A_ID
+WHERE A_NAME='명동';
+
+SELECT SA_NAME FROM SA S JOIN AREA A ON S.A_ID =A.A_ID 
+WHERE A_NAME = ‘명동’;
+
+-- 4-8) 도시별 자주 묻는 질문 조회
+SELECT ct_name, cq_q, cq_a FROM ctqna q join city c on q.ct_id = c.ct_id WHERE CT_name= '서울';
+
+
+-- 4-9) 도시 정보 조회 프로시저
+EXEC UP_SELCITY;
+
+
+
+-- 5. 예약
+-- 예약이 먼저 입력되면 자동으로 예약상태가 예약중이 되고, 총금액이 0으로 입력됨
+EXEC book_suk('체크아웃 빨리', 'M6');
+SELECT * FROM book;
+
+-- 해당 예약아이디를 받아와서 여러 객실 예약
+-- 객실 예약 후 예약 프로세스에서 투숙일을 계산해서 해당 값에 할인율을 곱해서 총 투숙일에 한 예약 상세 이벤트당 더해준다.
+   즉, 자동으로 총 금액이 계산되어 예약 테이블 반영
+
+EXEC bookmore_suk(1,'20281212','20281225' ,'R1', 'DD11');
+SELECT * FROM bookmore;
+SELECT * FROM book;
+
+-- 6. 결제
+-- 예약 테이블에서 금액을 받아와서 결제
+-- 결제가 완료되면 회원테이블에 리워드 1증가
+-- 리워드의 경우 0과 1로 파라미터 값을 줘서 구분
+-- 리워드 10개가 모이면 5만원 할인이라는 조건을 걸었음
+-- 
+
+-- 카드, 무통장입금, 현장결제, 리워드
+-- 무통장입금을 제외하고는 모두 결제상태가 결제완료 및 예약상태를 (예약중->예약완료)로 변경
+-- 무통장입금의 경우 결제 확인이 되면 결제상태 변경 가정
+
+SELECt * FROM member; -- 리워드 확인
+
+-- 1) 카드
+EXEC pay_pay( '0', '0', 'C1', 'DD6', 0 );
+
+-- 2) 무통장입금
+EXEC pay_pay( '국민은행', '강지현', 'C2', 'DD7', 0);
+
+
+
+-- 3) 리워드 (변수 1)
+EXEC pay_pay( '0', '0', 'C1', 'DD8',1);
+UPDATE member SET m_rw = 15 WHERE m_id = 'M3';
+
+EXEC pay_pay( '0', '0', 'C1', 'DD8',1);
+SELECt * FROM member; -- 리워드 확인
+
+
+-- 4) 현장결제
+EXEC pay_pay( '0', '0', 'C3', 'DD9', 0);
+
+
+SELECT * FROM pay;
+SELECt * FROM member; -- 리워드 확인
+
+-- 예약 조회프로시저 (회원아이디를 넣으면 내가 예약한 상태 조회가능)
+EXEC select_book ('M1');
+
+-- 7. 환불
+-- 체크인 3일 전까지 가능하다는 조건
+-- 한 객실에 대한 환불이 일어날 경우 전체 결제를 취소한 후 새로운 결제를 갱신하는 방식 (이건 시나리오상)
+-- 그래서 결제테이블 상태가 결제취소로 변경되며 예약테이블 또한 상태가 예약취소로 변경됨
+
+EXEC pay_refund('DDW10'); -- 환불불가 
+EXEC pay_refund('DDW11'); -- 환불가능
+
+
+-- 8. 예약 수정
+-- 바꾸려는 날짜에 이미 객실이 예약되어있는 경우 예약 수정이 불가능하다
+-- 예약수정이 일어난다면 바꾼 값 만큼 예약 테이블 총 금액에 변화가 일어난다 (+ - )
+
+EXEC book_edit('DDW11', '20221222', '20221230'); -- 예약 수정 불가능 (예약 상세 테이블에 해당 객실 이미 예약돼있음)
+SELECT * FROM book; -- 금액 변동 확인
+EXEC book_edit('DDW11', '20291222', '20291223'); -- 예약 수정가능 + 체크인아웃 날짜 변경 + 금액 변동
+SELECT * FROM book; -- 금액 변동 확인
+
+-- 9. 후기 및 평점 삭제
+
+EXEC DELETE_REVIEW_RATE(‘ RATE_ID/REVIEW_ID’);
+-- 리뷰와 후기는 동시에 삭제해야하기 때문에 두 아이디를 파라미터로 넘겨준다.
+-- 후기의 경우 삭제되면 숙박 테이블에서 후기수가 -1된다.
+-- 평점의 경우 삭제되면 숙박 테이블에서 총점이 평점만큼 -된다. 
+-- 각각 테이블에서 해당 값을 삭제해준다.
+
+SELECT * FROM sukbak WHERE s_id = 'H1';
+EXEC DELETE_REVIEW_RATE(‘ PJ1/REV1’);
+SELECT * FROM sukbak WHERE s_id = 'H1';
+SELECT * FROM rate;
+SELECT * FROM review;
+
+-- 10. 후기 및 평점 수정
+EXEC INSERT_RATE_REVIEW('PJ23',1,2,3,4,5,'H3','M3','REV20','너무 편안하게 보내다가 갑니다.','최고다',SYSDATE,1,1,1);
+EXEC 프로시져이름(평점ID,R1,R2,R3,R4,R5,숙박시설ID,회원ID,리뷰ID,리뷰내용,리뷰제목,입력날짜,성소수자환영,출장여행,가족여행);
+
+
+-- 11. 검색로그
+EXEC SEARCHLOG('M1','오크우드 프리미어 코엑스센터');
+SELECT * FROM log;
+

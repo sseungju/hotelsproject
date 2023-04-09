@@ -1,0 +1,1326 @@
+-- 초기화 커리문
+
+-- 1. 평점항목 (ph)
+
+/* 평점항목(ph) */
+DROP TABLE ph 
+	CASCADE CONSTRAINTS;
+
+/* 평점항목(ph) */
+CREATE TABLE ph (
+	ph_id VARCHAR2(20) NOT NULL, /* ph_id(항목 ID) */
+	ph_name NVARCHAR2(30) NOT NULL /* ph_name(항목 제목) */
+);
+
+ALTER TABLE ph
+	ADD
+		CONSTRAINT PK_ph
+		PRIMARY KEY (
+			ph_id
+		);
+
+-- 2. 지원 (support)
+
+/* 지원(support) */
+DROP TABLE support 
+	CASCADE CONSTRAINTS;
+
+/* 지원(support) */
+CREATE TABLE support (
+	sp_id VARCHAR2(20) NOT NULL, /* sp_id(지원ID) */
+	sp_menu NVARCHAR2(30) NOT NULL, /* sp_menu(메뉴) */
+	sp_first NVARCHAR2(50) NOT NULL, /* sp_first(대분류) */
+	sp_sec NVARCHAR2(50) NOT NULL, /* sp_sec(중분류) */
+	sp_name NVARCHAR2(50) NOT NULL, /* sp_name(제목) */
+	sp_con NVARCHAR2(2000) NOT NULL /* sp_con(내용) */
+);
+
+ALTER TABLE support
+	ADD
+		CONSTRAINT PK_support
+		PRIMARY KEY (
+			sp_id
+		);
+
+-- 3. 회원 (member)
+
+/* 회원(member) */
+DROP TABLE member 
+	CASCADE CONSTRAINTS;
+
+/* 회원(member) */
+CREATE TABLE member (
+	m_id VARCHAR2(20) NOT NULL, /* m_id(회원 ID) */
+	m_email NVARCHAR2(50) NOT NULL, /* m_email(이메일) */
+	m_name NVARCHAR2(50) NOT NULL, /* m_name(이름) */
+	m_sur NVARCHAR2(20) NOT NULL, /* m_sur(성) */
+	m_pw NVARCHAR2(20) NOT NULL, /* m_pw(비밀번호) */
+	m_rw NUMBER(2) NOT NULL, /* m_rw(리워드) */
+	m_phone CHAR(13) NOT NULL /* m_phone(전화번호) */
+);
+
+ALTER TABLE member
+	ADD
+		CONSTRAINT PK_member
+		PRIMARY KEY (
+			m_id
+		);
+
+-- 4. 국가 (country)
+
+/* 국가(country) */
+DROP TABLE country 
+	CASCADE CONSTRAINTS;
+
+/* 국가(country) */
+CREATE TABLE country (
+	c_id VARCHAR2(20) NOT NULL, /* c_id(국가ID) */
+	c_name NVARCHAR2(20) NOT NULL /* c_name(국가이름) */
+);
+
+ALTER TABLE country
+	ADD
+		CONSTRAINT PK_country
+		PRIMARY KEY (
+			c_id
+		);
+
+
+
+
+-- 5. 도시 (city)
+
+/* 도시(city) */
+DROP TABLE city 
+	CASCADE CONSTRAINTS;
+
+/* 도시(city) */
+CREATE TABLE city (
+	ct_id VARCHAR2(20) NOT NULL, /* ct_id(도시ID) */
+	ct_name NVARCHAR2(20) NOT NULL, /* ct_name(도시이름) */
+	ct_con NVARCHAR2(1000) NOT NULL, /* ct_con(도시소개) */
+	ct_loc NVARCHAR2(200) NOT NULL, /* ct_loc(도시 위치) */
+	c_id VARCHAR2(20) NOT NULL /* c_id(국가ID) */
+);
+
+ALTER TABLE city
+	ADD
+		CONSTRAINT PK_city
+		PRIMARY KEY (
+			ct_id
+		);
+
+ALTER TABLE city
+	ADD
+		CONSTRAINT FK_country_TO_city
+		FOREIGN KEY (
+			c_id
+		)
+		REFERENCES country (
+			c_id
+		);
+
+-- 6. 도시 qna
+
+/* ctqna(도시q&a) */
+DROP TABLE ctqna 
+	CASCADE CONSTRAINTS;
+
+/* ctqna(도시q&a) */
+CREATE TABLE ctqna (
+	cq_id VARCHAR2(20) NOT NULL, /* cq_id(도시qnaID) */
+	cq_q NVARCHAR2(500) NOT NULL, /* cq_q(질문) */
+	cq_a NVARCHAR2(1000) NOT NULL, /* cq_a(답변) */
+	ct_id VARCHAR2(20) NOT NULL /* ct_id(도시ID) */
+);
+
+ALTER TABLE ctqna
+	ADD
+		CONSTRAINT PK_ctqna
+		PRIMARY KEY (
+			cq_id
+		);
+
+ALTER TABLE ctqna
+	ADD
+		CONSTRAINT FK_city_TO_ctqna
+		FOREIGN KEY (
+			ct_id
+		)
+		REFERENCES city (
+			ct_id
+		);
+
+
+-- 7. 지역 (area)
+
+/* 지역(area) */
+DROP TABLE area 
+	CASCADE CONSTRAINTS;
+
+/* 지역(area) */
+CREATE TABLE area (
+	a_id VARCHAR2(20) NOT NULL, /* a_id(지역ID) */
+	a_name NVARCHAR2(20), /* a_name(지역 이름) */
+	a_nav NVARCHAR2(500), /* a_nav(가는 방법) */
+	a_con NVARCHAR2(1000), /* a_con(지역 소개) */
+	a_loc NVARCHAR2(500), /* a_loc(지역 위치) */
+	ct_id VARCHAR2(20) /* ct_id(도시ID) */
+);
+
+ALTER TABLE area
+	ADD
+		CONSTRAINT PK_area
+		PRIMARY KEY (
+			a_id
+		);
+
+ALTER TABLE area
+	ADD
+		CONSTRAINT FK_city_TO_area
+		FOREIGN KEY (
+			ct_id
+		)
+		REFERENCES city (
+			ct_id
+		);
+
+
+-- 8. 지역근처장소 (neararea)
+
+/* 지역 근처 장소(neararea) */
+DROP TABLE neararea 
+	CASCADE CONSTRAINTS;
+
+/* 지역 근처 장소(neararea) */
+CREATE TABLE neararea (
+	na_id VARCHAR2(20) NOT NULL, /* na_id(지역 근처 가볼 곳 ID) */
+	na_name NVARCHAR2(40) NOT NULL, /* na_name(지역 근처 가볼만한 장소) */
+	a_id VARCHAR2(20) NOT NULL /* a_id(지역ID) */
+);
+
+ALTER TABLE neararea
+	ADD
+		CONSTRAINT PK_neararea
+		PRIMARY KEY (
+			na_id
+		);
+
+ALTER TABLE neararea
+	ADD
+		CONSTRAINT FK_area_TO_neararea
+		FOREIGN KEY (
+			a_id
+		)
+		REFERENCES area (
+			a_id
+		);
+
+
+-- 9. 지역근처숙박 (sa)
+
+
+/* 지역근처 숙박(sa) */
+DROP TABLE sa 
+	CASCADE CONSTRAINTS;
+
+/* 지역근처 숙박(sa) */
+CREATE TABLE sa (
+	sa_id VARCHAR2(20) NOT NULL, /* sa_id(지역 근처 숙박 시설 ID) */
+	sa_name NVARCHAR2(50) NOT NULL, /* sa_name(지역 근처 숙박 시설들) */
+	a_id VARCHAR2(20) NOT NULL /* a_id(지역 ID) */
+);
+
+ALTER TABLE sa
+	ADD
+		CONSTRAINT PK_sa
+		PRIMARY KEY (
+			sa_id
+		);
+
+ALTER TABLE sa
+	ADD
+		CONSTRAINT FK_area_TO_sa
+		FOREIGN KEY (
+			a_id
+		)
+		REFERENCES area (
+			a_id
+		);
+
+
+
+-- 10. 랜드마크 (landmark)
+
+/* 랜드마크(landmark) */
+DROP TABLE landmark 
+	CASCADE CONSTRAINTS;
+
+/* 랜드마크(landmark) */
+CREATE TABLE landmark (
+	lm_id VARCHAR2(20) NOT NULL, /* lm_id(랜드마크 ID) */
+	lm_name NVARCHAR2(100) NOT NULL, /* lm_name(랜드마크이름) */
+	lm_loc NVARCHAR2(100) NOT NULL, /* lm_loc(랜드마크주소) */
+	lm_con NVARCHAR2(1000) NOT NULL, /* lm_con(랜드마크소개) */
+	ct_id VARCHAR2(20) NOT NULL /* ct_id(도시ID) */
+);
+
+ALTER TABLE landmark
+	ADD
+		CONSTRAINT PK_landmark
+		PRIMARY KEY (
+			lm_id
+		);
+
+ALTER TABLE landmark
+	ADD
+		CONSTRAINT FK_city_TO_landmark
+		FOREIGN KEY (
+			ct_id
+		)
+		REFERENCES city (
+			ct_id
+		);
+
+
+-- 11. 랜드마크근처장소 (nearlm)
+
+/* 랜드마크 근처 장소(nearlm) */
+DROP TABLE nearlm 
+	CASCADE CONSTRAINTS;
+
+/* 랜드마크 근처 장소(nearlm) */
+CREATE TABLE nearlm (
+	nlm_id VARCHAR2(20) NOT NULL, /* nlm_id(랜드 근처 가볼 곳 ID) */
+	nlm_name NVARCHAR2(50), /* nlm_name(랜드 근처 가볼 만한 장소) */
+	lm_id VARCHAR2(20) /* lm_id(랜드마크 ID) */
+);
+
+ALTER TABLE nearlm
+	ADD
+		CONSTRAINT PK_nearlm
+		PRIMARY KEY (
+			nlm_id
+		);
+
+ALTER TABLE nearlm
+	ADD
+		CONSTRAINT FK_landmark_TO_nearlm
+		FOREIGN KEY (
+			lm_id
+		)
+		REFERENCES landmark (
+			lm_id
+		);
+
+-- 12. 랜드마크근처숙박 (slm)
+
+/* 랜드마크 근처 숙박(slm) */
+DROP TABLE slm 
+	CASCADE CONSTRAINTS;
+
+/* 랜드마크 근처 숙박(slm) */
+CREATE TABLE slm (
+	slm_id VARCHAR2(20) NOT NULL, /* slm_id(랜드 근처 숙박 시설 ID) */
+	slm_name NVARCHAR2(100) NOT NULL, /* slm_name(랜드 근처 숙박 시설들) */
+	lm_id VARCHAR2(20) NOT NULL /* lm_id(랜드마크 ID) */
+);
+
+ALTER TABLE slm
+	ADD
+		CONSTRAINT PK_slm
+		PRIMARY KEY (
+			slm_id
+		);
+
+ALTER TABLE slm
+	ADD
+		CONSTRAINT FK_landmark_TO_slm
+		FOREIGN KEY (
+			lm_id
+		)
+		REFERENCES landmark (
+			lm_id
+		);
+
+
+-- 13. 업주 (owner)
+/* 업주(owner) */
+DROP TABLE owner 
+	CASCADE CONSTRAINTS;
+
+/* 업주(owner) */
+CREATE TABLE owner (
+	o_id VARCHAR2(20) NOT NULL, /* o_id(업주 ID) */
+	o_pw NVARCHAR2(20) NOT NULL, /* o_pw(비밀번호) */
+	o_phone CHAR(13) NOT NULL, /* o_phone(전화번호) */
+	o_name NVARCHAR2(20) NOT NULL, /* o_name(이름) */
+	o_sur NVARCHAR2(20) NOT NULL, /* o_sur(성) */
+	o_email NVARCHAR2(50) NOT NULL /* o_email(이메일 주소) */
+);
+
+ALTER TABLE owner
+	ADD
+		CONSTRAINT PK_owner
+		PRIMARY KEY (
+			o_id
+		);
+
+-- 14. 등록 (adds)
+
+/* 등록(adds) */
+DROP TABLE adds 
+	CASCADE CONSTRAINTS;
+
+/* 등록(adds) */
+CREATE TABLE adds (
+	ad_id VARCHAR2(20) NOT NULL, /* ad_id(등록 ID) */
+	ad_cnt NUMBER(3) NOT NULL, /* ad_cnt(객실 수) */
+	ad_type NVARCHAR2(20) NOT NULL, /* ad_type(유형) */
+	ad_money NVARCHAR2(20) NOT NULL, /* ad_money(통화단위) */
+	ac_chain NVARCHAR2(20) NOT NULL, /* ad_chain(체인) */
+	ad_kname NVARCHAR2(50) NOT NULL, /* ad_kname(시설 이름 한글) */
+	ad_ename NVARCHAR2(50) NOT NULL, /* ad_ename(시설 이름 영문) */
+	ad_loc NVARCHAR2(100) NOT NULL, /* ad_loc(주소) */
+	ad_date DATE NOT NULL, /* ad_date(등록 날짜) */
+	o_id VARCHAR2(20) NOT NULL /* o_id(업주 ID) */
+);
+
+ALTER TABLE adds
+	ADD
+		CONSTRAINT PK_adds
+		PRIMARY KEY (
+			ad_id
+		);
+
+ALTER TABLE adds
+	ADD
+		CONSTRAINT FK_owner_TO_adds
+		FOREIGN KEY (
+			o_id
+		)
+		REFERENCES owner (
+			o_id
+		);
+
+-- 15. 숙박시설유형 (stype)
+
+/* 숙박시설유형(stype) */
+DROP TABLE stype 
+	CASCADE CONSTRAINTS;
+
+/* 숙박시설유형(stype) */
+CREATE TABLE stype (
+	st_id VARCHAR2(20) NOT NULL, /* st_id(숙박시설 유형 ID) */
+	st_type NVARCHAR2(20) NOT NULL /* st_type(숙박시설 유형) */
+);
+
+ALTER TABLE stype
+	ADD
+		CONSTRAINT PK_stype
+		PRIMARY KEY (
+			st_id
+		);
+
+
+-- 16. 숙박 (sukbak)
+
+
+/* 숙박시설(sukbak) */
+DROP TABLE sukbak 
+	CASCADE CONSTRAINTS;
+
+/* 숙박시설(sukbak) */
+CREATE TABLE sukbak (
+	s_id VARCHAR2(20) NOT NULL, /* s_id(숙박 시설 ID) */
+	s_kname NVARCHAR2(400) NOT NULL, /* s_kname(숙박 시설 이름 (한글)) */
+	s_ename VARCHAR2(40) NOT NULL, /* s_ename(숙박 시설 이름 (영문)) */
+	s_grade NUMBER(1) NOT NULL, /* s_grade(숙박 시설 등급) */
+	s_loc NVARCHAR2(100) NOT NULL, /* s_loc(주소) */
+	s_cash NUMBER(1) NOT NULL, /* s_cash(현장 결제 가능 여부) */
+	s_image VARCHAR2(100) NOT NULL, /* s_image(이미지 파일 경로) */
+	s_reviewcnt NUMBER(20) NOT NULL, /* s_reviewcnt(후기 수) */
+	s_con NVARCHAR2(100) NOT NULL, /* s_con(숙박 시설 설명) */
+	s_total NUMBER(38) NOT NULL, /* s_total(숙박시설 전체 평점 합) */
+	a_id VARCHAR2(20) NOT NULL, /* a_id(지역ID) */
+	ct_id VARCHAR2(20) NOT NULL, /* ct_id(도시ID) */
+	st_id VARCHAR2(20) NOT NULL, /* st_id(숙박시설 유형 ID) */
+	s_sex NUMBER(30) NOT NULL, /* s_sex(성소수자환영점수) */
+	s_bs NUMBER(30) NOT NULL, /* s_bs(출장여행점수) */
+	s_fam NUMBER(30) NOT NULL, /* s_fam(가족여행점수) */
+	ad_id VARCHAR2(20), /* ad_id(등록 ID) */
+	s_cnt NUMBER(10) /* s_cnt(객실수) */
+);
+
+ALTER TABLE sukbak
+	ADD
+		CONSTRAINT PK_sukbak
+		PRIMARY KEY (
+			s_id
+		);
+
+ALTER TABLE sukbak
+	ADD
+		CONSTRAINT FK_area_TO_sukbak
+		FOREIGN KEY (
+			a_id
+		)
+		REFERENCES area (
+			a_id
+		);
+
+ALTER TABLE sukbak
+	ADD
+		CONSTRAINT FK_city_TO_sukbak
+		FOREIGN KEY (
+			ct_id
+		)
+		REFERENCES city (
+			ct_id
+		);
+
+ALTER TABLE sukbak
+	ADD
+		CONSTRAINT FK_stype_TO_sukbak
+		FOREIGN KEY (
+			st_id
+		)
+		REFERENCES stype (
+			st_id
+		);
+
+ALTER TABLE sukbak
+	ADD
+		CONSTRAINT FK_adds_TO_sukbak
+		FOREIGN KEY (
+			ad_id
+		)
+		REFERENCES adds (
+			ad_id
+		);
+
+
+-- 17. 숙박편의유형 (sinfotype)
+
+/* 숙박시설 내 편의 시설 유형(sinfotype) */
+DROP TABLE sinfotype 
+	CASCADE CONSTRAINTS;
+
+/* 숙박시설 내 편의 시설 유형(sinfotype) */
+CREATE TABLE sinfotype (
+	sit_id VARCHAR2(20) NOT NULL, /* sit_id(숙박 편의 유형 ID) */
+	sit_type NVARCHAR2(20) NOT NULL /* sit_type(숙박 편의 유형) */
+);
+
+ALTER TABLE sinfotype
+	ADD
+		CONSTRAINT PK_sinfotype
+		PRIMARY KEY (
+			sit_id
+		);
+
+-- 18. 숙박편의내용 (sinfocon)
+
+/* 숙박 시설 내 편의 시설 내용(sinfocon) */
+DROP TABLE sinfocon 
+	CASCADE CONSTRAINTS;
+
+/* 숙박 시설 내 편의 시설 내용(sinfocon) */
+CREATE TABLE sinfocon (
+	sic_id VARCHAR2(20) NOT NULL, /* sic_id(숙박 편의 내용 ID) */
+	sic_con NVARCHAR2(1000) NOT NULL, /* sic_con(숙박 편의 내용) */
+	sit_id VARCHAR2(20) NOT NULL /* sit_id(숙박 편의 유형 ID) */
+);
+
+ALTER TABLE sinfocon
+	ADD
+		CONSTRAINT PK_sinfocon
+		PRIMARY KEY (
+			sic_id
+		);
+
+ALTER TABLE sinfocon
+	ADD
+		CONSTRAINT FK_sinfotype_TO_sinfocon
+		FOREIGN KEY (
+			sit_id
+		)
+		REFERENCES sinfotype (
+			sit_id
+		);
+
+-- 19. 숙박편의 (sinfo)
+
+/* 숙박시설 내 편의 시설 저장 정보(sinfo) */
+DROP TABLE sinfo 
+	CASCADE CONSTRAINTS;
+
+/* 숙박시설 내 편의 시설 저장 정보(sinfo) */
+CREATE TABLE sinfo (
+	si_id VARCHAR2(20) NOT NULL, /* si_id(숙박 편의 저장 정보 ID) */
+	sit_id VARCHAR2(20) NOT NULL, /* sit_id(숙박 편의 유형 ID) */
+	s_id VARCHAR2(20) NOT NULL, /* s_id(숙박 시설 ID) */
+	sic_id VARCHAR2(20) NOT NULL /* sic_id(숙박 편의 내용 ID) */
+);
+
+ALTER TABLE sinfo
+	ADD
+		CONSTRAINT PK_sinfo
+		PRIMARY KEY (
+			si_id
+		);
+
+ALTER TABLE sinfo
+	ADD
+		CONSTRAINT FK_sukbak_TO_sinfo
+		FOREIGN KEY (
+			s_id
+		)
+		REFERENCES sukbak (
+			s_id
+		);
+
+ALTER TABLE sinfo
+	ADD
+		CONSTRAINT FK_sinfocon_TO_sinfo
+		FOREIGN KEY (
+			sic_id
+		)
+		REFERENCES sinfocon (
+			sic_id
+		);
+
+ALTER TABLE sinfo
+	ADD
+		CONSTRAINT FK_sinfotype_TO_sinfo
+		FOREIGN KEY (
+			sit_id
+		)
+		REFERENCES sinfotype (
+			sit_id
+		);
+
+-- 20. 요금정책유형 (yinfotype)
+
+/* 요금 및 정책 유형(yinfotype) */
+DROP TABLE yinfotype 
+	CASCADE CONSTRAINTS;
+
+/* 요금 및 정책 유형(yinfotype) */
+CREATE TABLE yinfotype (
+	yit_id VARCHAR(20) NOT NULL, /* yit_id(요금 정책 유형ID) */
+	yit_type NVARCHAR2(50) NOT NULL /* yit_type(요금 정책 유형) */
+);
+
+ALTER TABLE yinfotype
+	ADD
+		CONSTRAINT PK_yinfotype
+		PRIMARY KEY (
+			yit_id
+		);
+
+
+-- 21. 요금정책내용 (yinfocon)
+
+/* 요금 및 정책 내용(yinfocon) */
+DROP TABLE yinfocon 
+	CASCADE CONSTRAINTS;
+
+/* 요금 및 정책 내용(yinfocon) */
+CREATE TABLE yinfocon (
+	yic_id VARCHAR2(20) NOT NULL, /* yic_id(요금 정책 내용 ID) */
+	yic_con NVARCHAR2(1000) NOT NULL, /* yic_con(요금 정책 내용) */
+	yit_id VARCHAR(20) NOT NULL /* yit_id(요금 정책 유형ID) */
+);
+
+ALTER TABLE yinfocon
+	ADD
+		CONSTRAINT PK_yinfocon
+		PRIMARY KEY (
+			yic_id
+		);
+
+ALTER TABLE yinfocon
+	ADD
+		CONSTRAINT FK_yinfotype_TO_yinfocon
+		FOREIGN KEY (
+			yit_id
+		)
+		REFERENCES yinfotype (
+			yit_id
+		);
+
+
+-- 22. 요금정책 (yinfo)
+
+/* 요금 및 정책 저장정보(yinfo) */
+DROP TABLE yinfo 
+	CASCADE CONSTRAINTS;
+
+/* 요금 및 정책 저장정보(yinfo) */
+CREATE TABLE yinfo (
+	yi_id VARCHAR2(20) NOT NULL, /* yi_id(요금 정책 저장 ID) */
+	s_id VARCHAR2(20) NOT NULL, /* s_id(숙박 시설 ID) */
+	yic_id VARCHAR2(20) NOT NULL, /* yic_id(요금 정책 내용 ID) */
+	yit_id VARCHAR(20) NOT NULL /* yit_id(요금 정책 유형ID) */
+);
+
+ALTER TABLE yinfo
+	ADD
+		CONSTRAINT PK_yinfo
+		PRIMARY KEY (
+			yi_id
+		);
+
+ALTER TABLE yinfo
+	ADD
+		CONSTRAINT FK_sukbak_TO_yinfo
+		FOREIGN KEY (
+			s_id
+		)
+		REFERENCES sukbak (
+			s_id
+		);
+
+ALTER TABLE yinfo
+	ADD
+		CONSTRAINT FK_yinfocon_TO_yinfo
+		FOREIGN KEY (
+			yic_id
+		)
+		REFERENCES yinfocon (
+			yic_id
+		);
+
+ALTER TABLE yinfo
+	ADD
+		CONSTRAINT FK_yinfotype_TO_yinfo
+		FOREIGN KEY (
+			yit_id
+		)
+		REFERENCES yinfotype (
+			yit_id
+		);
+
+
+-- 23. 식사 (meal)
+
+/* 식사 포함 여부(meal) */
+DROP TABLE meal 
+	CASCADE CONSTRAINTS;
+
+/* 식사 포함 여부(meal) */
+CREATE TABLE meal (
+	meal_id VARCHAR2(20) NOT NULL, /* s_id(숙박 시설 ID) */
+	meal_b NUMBER(1) NOT NULL, /* meal_b(아침) */
+	meal_l NUMBER(1) NOT NULL, /* meal_l(점심) */
+	meal_d NUMBER(1) NOT NULL /* meal_d(저녁) */
+);
+
+ALTER TABLE meal
+	ADD
+		CONSTRAINT PK_meal
+		PRIMARY KEY (
+			meal_id
+		);
+
+ALTER TABLE meal
+	ADD
+		CONSTRAINT FK_sukbak_TO_meal
+		FOREIGN KEY (
+			meal_id
+		)
+		REFERENCES sukbak (
+			s_id
+		);
+
+
+-- 24. Q&A (qna)
+
+
+/* Q&A(qna) */
+DROP TABLE qna 
+	CASCADE CONSTRAINTS;
+
+/* Q&A(qna) */
+CREATE TABLE qna (
+	q_id VARCHAR2(20) NOT NULL, /* q_id(질문 ID) */
+	q_q NVARCHAR2(100) NOT NULL, /* q_q(질문) */
+	q_a NVARCHAR2(1000) NOT NULL, /* q_a(답변) */
+	s_id VARCHAR2(20) NOT NULL /* s_id(숙박 시설 ID) */
+);
+
+ALTER TABLE qna
+	ADD
+		CONSTRAINT PK_qna
+		PRIMARY KEY (
+			q_id
+		);
+
+ALTER TABLE qna
+	ADD
+		CONSTRAINT FK_sukbak_TO_qna
+		FOREIGN KEY (
+			s_id
+		)
+		REFERENCES sukbak (
+			s_id
+		);
+
+
+
+-- 25. 객실 (room)
+
+/* 객실(room) */
+DROP TABLE room 
+	CASCADE CONSTRAINTS;
+
+/* 객실(room) */
+CREATE TABLE room (
+	r_id VARCHAR2(20) NOT NULL, /* r_id(객실 ID) */
+	r_name VARCHAR2(50) NOT NULL, /* r_name(방 이름) */
+	r_cost NUMBER(10) NOT NULL, /* r_cost(방 가격) */
+	r_pro NUMBER(6,2) NOT NULL, /* r_pro(프로모션 여부) */
+	r_ppl NUMBER(2) NOT NULL, /* r_ppl(인원수 제한) */
+	r_size NUMBER(2) NOT NULL, /* r_size(객실 크기) */
+	r_num NUMBER(4) NOT NULL, /* r_num(호수) */
+	s_id VARCHAR2(20) NOT NULL /* s_id(숙박 시설 ID) */
+);
+
+ALTER TABLE room
+	ADD
+		CONSTRAINT PK_room
+		PRIMARY KEY (
+			r_id
+		);
+
+ALTER TABLE room
+	ADD
+		CONSTRAINT FK_sukbak_TO_room
+		FOREIGN KEY (
+			s_id
+		)
+		REFERENCES sukbak (
+			s_id
+		);
+
+-- 26. 침대 (bed)
+
+/* 침대(bed) */
+DROP TABLE bed 
+	CASCADE CONSTRAINTS;
+
+/* 침대(bed) */
+CREATE TABLE bed (
+	bed_id VARCHAR2(20) NOT NULL, /* bed_id(객실 침대 ID) */
+	bed_size VARCHAR2(10) NOT NULL, /* bed_size(침대 사이즈) */
+	bed_cnt NUMBER(2) NOT NULL, /* bed_cnt(침대 개수) */
+	r_id VARCHAR2(20) NOT NULL /* r_id(객실 ID) */
+);
+
+ALTER TABLE bed
+	ADD
+		CONSTRAINT PK_bed
+		PRIMARY KEY (
+			bed_id
+		);
+
+ALTER TABLE bed
+	ADD
+		CONSTRAINT FK_room_TO_bed
+		FOREIGN KEY (
+			r_id
+		)
+		REFERENCES room (
+			r_id
+		);
+
+-- 27. 객실편의유형 (rinfotype)
+
+/* 객실 내 편의 시설 유형(rinfotype) */
+DROP TABLE rinfotype 
+	CASCADE CONSTRAINTS;
+
+/* 객실 내 편의 시설 유형(rinfotype) */
+CREATE TABLE rinfotype (
+	rit_id VARCHAR2(20) NOT NULL, /* rit_id(객실 편의 유형 ID) */
+	rit_type NVARCHAR2(50) NOT NULL /* rit_type(객실 편의 유형내용) */
+);
+
+ALTER TABLE rinfotype
+	ADD
+		CONSTRAINT PK_rinfotype
+		PRIMARY KEY (
+			rit_id
+		);
+
+
+-- 28. 객실편의내용 (rinfocon)
+
+/* 객실 내 편의시설 내용(rinfocon) */
+DROP TABLE rinfocon 
+	CASCADE CONSTRAINTS;
+
+/* 객실 내 편의시설 내용(rinfocon) */
+CREATE TABLE rinfocon (
+	ric_id VARCHAR2(20) NOT NULL, /* ric_id(객실 편의내용 ID) */
+	rit_id VARCHAR2(20) NOT NULL, /* rit_id(객실 편의 유형 ID) */
+	ric_con NVARCHAR2(1000) NOT NULL /* ric_con(객실 편의 내용) */
+);
+
+ALTER TABLE rinfocon
+	ADD
+		CONSTRAINT PK_rinfocon
+		PRIMARY KEY (
+			ric_id
+		);
+
+ALTER TABLE rinfocon
+	ADD
+		CONSTRAINT FK_rinfotype_TO_rinfocon
+		FOREIGN KEY (
+			rit_id
+		)
+		REFERENCES rinfotype (
+			rit_id
+		);
+
+
+-- 29. 객실편의 (rinfo)
+
+/* 객실 내 편의 시설 저장 정보(rinfo) */
+DROP TABLE rinfo 
+	CASCADE CONSTRAINTS;
+
+/* 객실 내 편의 시설 저장 정보(rinfo) */
+CREATE TABLE rinfo (
+	ri_id VARCHAR2(20) NOT NULL, /* ri_id(객실 편의 저장정보 ID) */
+	rit_id VARCHAR2(20) NOT NULL, /* rit_id(객실 편의 유형 ID) */
+	r_id VARCHAR2(20) NOT NULL, /* r_id(객실 ID) */
+	ric_id VARCHAR2(20) NOT NULL/* ric_id(객실 편의내용 ID) */
+);
+
+ALTER TABLE rinfo
+	ADD
+		CONSTRAINT PK_rinfo
+		PRIMARY KEY (
+			ri_id
+		);
+
+ALTER TABLE rinfo
+	ADD
+		CONSTRAINT FK_room_TO_rinfo
+		FOREIGN KEY (
+			r_id
+		)
+		REFERENCES room (
+			r_id
+		);
+
+ALTER TABLE rinfo
+	ADD
+		CONSTRAINT FK_rinfocon_TO_rinfo
+		FOREIGN KEY (
+			ric_id
+		)
+		REFERENCES rinfocon (
+			ric_id
+		);
+
+ALTER TABLE rinfo
+	ADD
+		CONSTRAINT FK_rinfotype_TO_rinfo
+		FOREIGN KEY (
+			rit_id
+		)
+		REFERENCES rinfotype (
+			rit_id
+		);
+
+
+
+-- 30. 결제상태 (pstate)
+
+/* 결제상태(pstate) */
+DROP TABLE pstate 
+	CASCADE CONSTRAINTS;
+
+/* 결제상태(pstate) */
+CREATE TABLE pstate (
+	ps_id VARCHAR2(20) NOT NULL, /* ps_id(결제상태ID) */
+	ps NVARCHAR2(20) NOT NULL /* ps(결제상태) */
+);
+
+ALTER TABLE pstate
+	ADD
+		CONSTRAINT PK_pstate
+		PRIMARY KEY (
+			ps_id
+		);
+
+-- 31. 결제수단 (paytype)
+
+/* 결제 수단(paytype) */
+DROP TABLE paytype 
+	CASCADE CONSTRAINTS;
+
+/* 결제 수단(paytype) */
+CREATE TABLE paytype (
+	pt_id VARCHAR2(20) NOT NULL, /* pt_id(결제 수단 ID) */
+	pt_type NVARCHAR2(20) NOT NULL /* pt_type(결제 수단) */
+);
+
+ALTER TABLE paytype
+	ADD
+		CONSTRAINT PK_paytype
+		PRIMARY KEY (
+			pt_id
+		);
+
+
+
+
+
+
+-- 34. 예약상태(bstate)
+
+/* 예약상태(bstate) */
+DROP TABLE bstate 
+	CASCADE CONSTRAINTS;
+
+/* 예약상태(bstate) */
+CREATE TABLE bstate (
+	bs_id VARCHAR2(20) NOT NULL, /* bs_id(예약상태ID) */
+	bs NVARCHAR2(20) NOT NULL /* bs(예약상태) */
+);
+
+ALTER TABLE bstate
+	ADD
+		CONSTRAINT PK_bstate
+		PRIMARY KEY (
+			bs_id
+		);
+
+
+
+-- 35. 예약 (book)
+
+
+/* 예약(book) */
+DROP TABLE book 
+	CASCADE CONSTRAINTS;
+
+/* 예약(book) */
+CREATE TABLE book (
+	b_id VARCHAR2(20) NOT NULL, /* b_id(예약ID) */
+	b_cost NUMBER(10) NOT NULL, /* b_cost(총금액) */
+	b_date DATE NOT NULL, /* b_date(예약 일자) */
+	b_con NVARCHAR2(100) NOT NULL, /* b_con(특별 요청 사항) */
+	m_id VARCHAR2(20) NOT NULL, /* m_id(회원 ID) */
+	bs_id VARCHAR2(20) NOT NULL /* bs_id(예약상태ID) */
+);
+
+ALTER TABLE book
+	ADD
+		CONSTRAINT PK_book
+		PRIMARY KEY (
+			b_id
+		);
+
+ALTER TABLE book
+	ADD
+		CONSTRAINT FK_member_TO_book
+		FOREIGN KEY (
+			m_id
+		)
+		REFERENCES member (
+			m_id
+		);
+
+ALTER TABLE book
+	ADD
+		CONSTRAINT FK_bstate_TO_book
+		FOREIGN KEY (
+			bs_id
+		)
+		REFERENCES bstate (
+			bs_id
+		);
+
+
+-- 36. 예약상세(bookmore)
+
+/* 예약상세(bookmore) */
+DROP TABLE bookmore 
+	CASCADE CONSTRAINTS;
+
+/* 예약상세(bookmore) */
+CREATE TABLE bookmore (
+	bm_id VARCHAR2(20) NOT NULL, /* bm_id(예약상세ID) */
+	bm_cost NUMBER(10) NOT NULL, /* bm_cost(금액) */
+	bm_ppl NUMBER(10) NOT NULL, /* bm_ppl(인원) */
+	bm_in DATE NOT NULL, /* bm_in(체크인날짜) */
+	bm_out DATE NOT NULL, /* bm_out(체크아웃날짜) */
+	r_id VARCHAR2(20) NOT NULL, /* r_id(객실 ID) */
+	b_id VARCHAR2(20) NOT NULL /* b_id(예약ID) */
+);
+
+ALTER TABLE bookmore
+	ADD
+		CONSTRAINT PK_bookmore
+		PRIMARY KEY (
+			bm_id
+		);
+
+ALTER TABLE bookmore
+	ADD
+		CONSTRAINT FK_room_TO_bookmore
+		FOREIGN KEY (
+			r_id
+		)
+		REFERENCES room (
+			r_id
+		);
+
+ALTER TABLE bookmore
+	ADD
+		CONSTRAINT FK_book_TO_bookmore
+		FOREIGN KEY (
+			b_id
+		)
+		REFERENCES book (
+			b_id
+		);
+
+
+
+
+
+
+
+-- 32. 결제 (pay)
+
+/* 결제(pay) */
+DROP TABLE pay 
+	CASCADE CONSTRAINTS;
+
+/* 결제(pay) */
+CREATE TABLE pay (
+	p_id VARCHAR2(20) NOT NULL, /* p_id(결제 ID) */
+	p_cost NUMBER(10) NOT NULL, /* p_cost(결제 금액) */
+	p_date DATE NOT NULL, /* p_date(결제 일자) */
+	p_bank NVARCHAR2(20) NOT NULL, /* p_bank(입금은행) */
+	p_name NVARCHAR2(20) NOT NULL, /* p_name(입금자명) */
+	pt_id VARCHAR2(20) NOT NULL, /* pt_id(결제 수단 ID) */
+	ps_id VARCHAR2(20), /* ps_id(결제상태ID) */
+	b_id VARCHAR2(20) /* b_id(예약ID) */
+);
+
+ALTER TABLE pay
+	ADD
+		CONSTRAINT PK_pay
+		PRIMARY KEY (
+			p_id
+		);
+
+ALTER TABLE pay
+	ADD
+		CONSTRAINT FK_paytype_TO_pay
+		FOREIGN KEY (
+			pt_id
+		)
+		REFERENCES paytype (
+			pt_id
+		);
+
+ALTER TABLE pay
+	ADD
+		CONSTRAINT FK_pstate_TO_pay
+		FOREIGN KEY (
+			ps_id
+		)
+		REFERENCES pstate (
+			ps_id
+		);
+
+ALTER TABLE pay
+	ADD
+		CONSTRAINT FK_book_TO_pay
+		FOREIGN KEY (
+			b_id
+		)
+		REFERENCES book (
+			b_id
+		);
+-- 33. 환불 (refund)
+
+/* 환불(refund) */
+DROP TABLE refund 
+	CASCADE CONSTRAINTS;
+
+/* 환불(refund) */
+CREATE TABLE refund (
+	rf_id VARCHAR2(20) NOT NULL, /* rf_id(환불  ID) */
+	rf_date DATE NOT NULL, /* rf_date(환불 일자) */
+	p_id VARCHAR2(20) /* p_id(결제 ID) */
+);
+
+ALTER TABLE refund
+	ADD
+		CONSTRAINT PK_refund
+		PRIMARY KEY (
+			rf_id
+		);
+
+ALTER TABLE refund
+	ADD
+		CONSTRAINT FK_pay_TO_refund
+		FOREIGN KEY (
+			p_id
+		)
+		REFERENCES pay (
+			p_id
+		);
+
+
+
+
+
+
+
+
+
+-- 37. 검색로그 (log)
+
+/* 검색 로그(log) */
+DROP TABLE log 
+	CASCADE CONSTRAINTS;
+
+/* 검색 로그(log) */
+CREATE TABLE log (
+	l_id VARCHAR2(20) NOT NULL, /* l_id(검색기록 ID) */
+	m_id VARCHAR2(20) NOT NULL, /* m_id(회원 ID) */
+	s_id VARCHAR2(20) NOT NULL /* s_id(숙박 시설 ID) */
+);
+
+ALTER TABLE log
+	ADD
+		CONSTRAINT PK_log
+		PRIMARY KEY (
+			l_id
+		);
+
+ALTER TABLE log
+	ADD
+		CONSTRAINT FK_member_TO_log
+		FOREIGN KEY (
+			m_id
+		)
+		REFERENCES member (
+			m_id
+		);
+
+ALTER TABLE log
+	ADD
+		CONSTRAINT FK_sukbak_TO_log
+		FOREIGN KEY (
+			s_id
+		)
+		REFERENCES sukbak (
+			s_id
+		);
+
+-- 38. 후기 (review)
+
+/* 후기(review) */
+DROP TABLE review 
+	CASCADE CONSTRAINTS;
+
+/* 후기(review) */
+CREATE TABLE review (
+	re_id VARCHAR2(20) NOT NULL, /* re_id(후기 ID) */
+	re_con NVARCHAR2(100) NOT NULL, /* re_con(내용) */
+	re_name NVARCHAR2(40) NOT NULL, /* re_name */
+	re_date DATE DEFAULT SYSDATE NOT NULL, /* re_date(입력 날짜) */
+	re_sex NUMBER(20) NOT NULL, /* re_sex성소주자 환영 */
+	re_bs NUMBER(20) NOT NULL, /* re_bs(출장여행에 좋음) */
+	re_family NUMBER(20) NOT NULL, /* re_fam(가족 여행에 좋음) */
+	s_id VARCHAR2(20) NOT NULL, /* s_id(숙박 시설 ID) */
+	m_id VARCHAR2(20) NOT NULL /* m_id(회원 ID) */
+);
+
+ALTER TABLE review
+	ADD
+		CONSTRAINT PK_review
+		PRIMARY KEY (
+			re_id
+		);
+
+ALTER TABLE review
+	ADD
+		CONSTRAINT FK_sukbak_TO_review
+		FOREIGN KEY (
+			s_id
+		)
+		REFERENCES sukbak (
+			s_id
+		);
+
+ALTER TABLE review
+	ADD
+		CONSTRAINT FK_member_TO_review
+		FOREIGN KEY (
+			m_id
+		)
+		REFERENCES member (
+			m_id
+		);
+
+
+-- 39. 평점 (rate)
+
+/* 평점(rate) */
+DROP TABLE rate 
+	CASCADE CONSTRAINTS;
+
+/* 평점(rate) */
+CREATE TABLE rate (
+	rate_id VARCHAR2(20) NOT NULL, /* rate_id(평점 ID) */
+	r1 NVARCHAR2(30) NOT NULL, /* r1(항목1) */
+	r2 NVARCHAR2(30) NOT NULL, /* r2(항목2) */
+	r3 NVARCHAR2(30) NOT NULL, /* r3(항목3) */
+	r4 NVARCHAR2(30) NOT NULL, /* r4(항목4) */
+	r5 NVARCHAR2(30) NOT NULL, /* r5(항목5) */
+	s_id VARCHAR2(20) NOT NULL, /* s_id(숙박 시설 ID) */
+	m_id VARCHAR2(20) NOT NULL /* m_id(회원 ID) */
+);
+
+ALTER TABLE rate
+	ADD
+		CONSTRAINT PK_rate
+		PRIMARY KEY (
+			rate_id
+		);
+
+ALTER TABLE rate
+	ADD
+		CONSTRAINT FK_sukbak_TO_rate
+		FOREIGN KEY (
+			s_id
+		)
+		REFERENCES sukbak (
+			s_id
+		);
+
+ALTER TABLE rate
+	ADD
+		CONSTRAINT FK_member_TO_rate
+		FOREIGN KEY (
+			m_id
+		)
+		REFERENCES member (
+			m_id
+		);
+        
+        
+
